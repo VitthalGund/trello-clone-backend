@@ -83,3 +83,30 @@ def column_detail(request, pk):
         return Response(
             {"error": "An error occurred"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
         )
+
+
+@api_view(["PUT"])
+def reorder_columns(request):
+    try:
+        column_ids = request.data.get("column_ids", [])
+        updated_columns = []
+
+        for index, column_id in enumerate(column_ids, start=1):
+            column = Column.objects.get(pk=column_id)
+            old_order = column.order
+            column.order = index
+            column.save()
+
+            # Shift other columns with the same order
+            other_columns = Column.objects.filter(order=old_order).exclude(pk=column_id)
+            for other_column in other_columns:
+                other_column.order += 1
+                other_column.save()
+
+            updated_columns.append(column)
+
+        # Serialize the updated columns and return them
+        serializer = ColumnSerializer(updated_columns, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
