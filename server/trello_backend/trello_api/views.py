@@ -2,8 +2,8 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from .models import Column
-from .serializers import ColumnSerializer
+from .models import Column, Card
+from .serializers import ColumnSerializer, CardSerializer
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import logging
 
@@ -108,5 +108,126 @@ def reorder_columns(request):
         # Serialize the updated columns and return them
         serializer = ColumnSerializer(updated_columns, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# Card Views:
+
+
+@api_view(["POST"])
+def create_card(request):
+    try:
+        serializer = CardSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(["GET"])
+def get_card(request, card_id):
+    try:
+        card = Card.objects.get(pk=card_id)
+        serializer = CardSerializer(card)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except Card.DoesNotExist:
+        return Response({"error": "Card not found"}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(["PUT"])
+def update_card(request, card_id):
+    try:
+        card = Card.objects.get(pk=card_id)
+        serializer = CardSerializer(instance=card, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    except Card.DoesNotExist:
+        return Response({"error": "Card not found"}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(["DELETE"])
+def delete_card(request, card_id):
+    try:
+        card = Card.objects.get(pk=card_id)
+        card.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    except Card.DoesNotExist:
+        return Response({"error": "Card not found"}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# views.py
+
+
+@api_view(["PUT"])
+def move_card(request, card_id):
+    try:
+        card = Card.objects.get(pk=card_id)
+        new_column_id = request.data.get("new_column_id")
+
+        # Check if the new column exists
+        try:
+            new_column = Column.objects.get(pk=new_column_id)
+        except Column.DoesNotExist:
+            return Response(
+                {"error": "New column does not exist"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # Move the card to the new column
+        card.column = new_column
+        card.save()
+
+        serializer = CardSerializer(card)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    except Card.DoesNotExist:
+        return Response({"error": "Card not found"}, status=status.HTTP_404_NOT_FOUND)
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@api_view(["PUT"])
+def reorder_cards(request, column_id):
+    try:
+        column = Column.objects.get(pk=column_id)
+        card_orders = request.data.get("card_orders", {})
+
+        total_cards = (
+            column.cards.count()
+        )  # Get the total number of cards in the column
+
+        for card_id, new_order in card_orders.items():
+            try:
+                new_order = int(new_order)
+                if 1 <= new_order <= total_cards:  # Validate the new order
+                    card = Card.objects.get(pk=card_id, column=column)
+                    card.order = new_order
+                    card.save()
+                else:
+                    return Response(
+                        {"error": f"Invalid order number for card {card_id}"},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+            except ValueError:
+                return Response(
+                    {"error": f"Invalid order format for card {card_id}"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            except Card.DoesNotExist:
+                pass  # Ignore if card not found in the column
+
+        return Response(status=status.HTTP_200_OK)
+    except Column.DoesNotExist:
+        return Response({"error": "Column not found"}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
