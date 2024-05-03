@@ -10,6 +10,13 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+@api_view(["GET"])
+def welcome(request):
+    return Response(
+        {"message": "Welcome to Trello backend API"}, status=status.HTTP_200_OK
+    )
+
+
 @api_view(["GET", "POST"])
 def column_list_create(request):
     try:

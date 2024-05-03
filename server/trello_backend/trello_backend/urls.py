@@ -20,6 +20,7 @@ from django.urls import path, include
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("", include("trello_api.urls")),
     path("api/accounts/", include("accounts.urls")),
     path("api/core/", include("trello_api.urls")),
 ]
