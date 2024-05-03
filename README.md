@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="https://your-project-logo-url" alt="Project Logo">
+</p>
+
 # Trello Backend API
 
 Welcome to the Trello Backend API project! This project provides the backend API for a Trello-like task management application. It allows users to create, manage, and organize tasks and projects efficiently.
@@ -77,7 +81,7 @@ To interact with the API endpoints, you can use tools like Postman or curl. Here
 
 - **Creating a New User Account**:
   ```bash
-  curl -X POST http://localhost:8000/api/accounts/register -d '{"username": "user1", "password": "password123"}' -H 'Content-Type: application/json'
+  curl -X POST http://localhost:8000/api/accounts/register -d '{"username": "user1", "email": "user1@example.com", "password": "password123", "full_name": "John Doe", "bio": "Short bio about the user", "organization": "Organization name"}' -H 'Content-Type: application/json'
   ```
 
 - **Logging in to an Existing User Account**:
@@ -92,20 +96,12 @@ To interact with the API endpoints, you can use tools like Postman or curl. Here
 
 - **Adding a New Card to a Column**:
   ```bash
-  curl -X POST http://localhost:8000/api/core/cards -d '{"title": "New Card", "description": "Description of the card", "column_id": 1}' -H 'Authorization: Bearer <your-token>' -H 'Content-Type: application/json'
+  curl -X POST http://localhost:8000/api/core/cards -d '{"title": "New Card", "description": "Description of the card", "column": 1}' -H 'Authorization: Bearer <your-token>' -H 'Content-Type: application/json'
   ```
 
-## 🛠️ Configuration
+## 📝 Configuration
 
 The project settings can be modified in the `settings.py` file. You can configure database settings, secret keys, logging, and more.
-
-## 📝 Logging
-
-This project utilizes Python's logging module for logging information. The logging configuration can be found in the `settings.py` file. By default, logs are stored in a file named `trello.log` in the project directory.
-
-## 🤝 Contributing
-
-We welcome contributions to this project! If you would like to contribute, please read the [CONTRIBUTING.md](CONTRIBUTING.md) file for details on our code of conduct and contribution guidelines.
 
 ## 📄 License
 
