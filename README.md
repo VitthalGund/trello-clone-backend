@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="https://your-project-logo-url" alt="Project Logo">
-</p>
-
 # Trello Backend API
 
 Welcome to the Trello Backend API project! This project provides the backend API for a Trello-like task management application. It allows users to create, manage, and organize tasks and projects efficiently.
