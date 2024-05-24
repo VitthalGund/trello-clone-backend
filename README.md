@@ -21,7 +21,7 @@ Welcome to the Trello Backend API project! This project provides the backend API
 2. Navigate to the project directory:
 
    ```bash
-   cd trello-backend-api
+   cd trello-backend-api-main
    ```
 
 3. Create a virtual environment (optional but recommended):
