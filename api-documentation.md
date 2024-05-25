@@ -1,4 +1,4 @@
-## 📖 API Documentation - Accounts App
+## 📖 API Documentation For - Accounts App
 
 Welcome to the API documentation for the accounts endpoints in the Trello Backend API. This API provides endpoints for user authentication and management.
 
